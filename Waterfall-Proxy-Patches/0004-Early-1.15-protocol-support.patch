@@ -1,0 +1,392 @@
+From 7c82b264994a92fcb7cec00c7a4aabdbec19dea0 Mon Sep 17 00:00:00 2001
+From: Shane Freeder <theboyetronic@gmail.com>
+Date: Tue, 10 Dec 2019 18:16:20 +0000
+Subject: [PATCH] Early 1.15 protocol support
+
+1.15 protocol support is unsupported, entity metadata rewriting *will* be disabled for this protocol version
+
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java b/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
+index a5999b40..a5d75c18 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
+@@ -69,21 +69,24 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_7_2, 0x00 ), // Travertine
+                     map( ProtocolConstants.MINECRAFT_1_9, 0x1F ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x21 ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x20 )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x20 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x21 ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     Login.class,
+                     Login::new, // Waterfall - speed up packet construction
+                     map( ProtocolConstants.MINECRAFT_1_7_2, 0x01 ), // Travertine
+                     map( ProtocolConstants.MINECRAFT_1_9, 0x23 ),
+-                    map( ProtocolConstants.MINECRAFT_1_13, 0x25 )
++                    map( ProtocolConstants.MINECRAFT_1_13, 0x25 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x26 ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     Chat.class,
+                     Chat::new, // Waterfall - speed up packet construction
+                     map( ProtocolConstants.MINECRAFT_1_7_2, 0x02 ), // Travertine
+                     map( ProtocolConstants.MINECRAFT_1_9, 0x0F ),
+-                    map( ProtocolConstants.MINECRAFT_1_13, 0x0E )
++                    map( ProtocolConstants.MINECRAFT_1_13, 0x0E ),
++                    map (ProtocolConstants.MINECRAFT_1_15, 0x0F) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     Respawn.class,
+@@ -93,12 +96,14 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12, 0x34 ),
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x35 ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x38 ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x3A )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x3A ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x3B ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     BossBar.class,
+                     BossBar::new, // Waterfall - speed up packet construction
+-                    map( ProtocolConstants.MINECRAFT_1_9, 0x0C )
++                    map( ProtocolConstants.MINECRAFT_1_9, 0x0C ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x0D ) // Travertine
+             );
+             // Waterfall start
+             TO_CLIENT.registerPacket(
+@@ -110,7 +115,8 @@ public enum Protocol
+                     map(ProtocolConstants.MINECRAFT_1_12, 0x4E),
+                     map(ProtocolConstants.MINECRAFT_1_12_1, 0x4F),
+                     map(ProtocolConstants.MINECRAFT_1_13, 0x53),
+-                    map(ProtocolConstants.MINECRAFT_1_14, 0x59)
++                    map(ProtocolConstants.MINECRAFT_1_14, 0x59),
++                    map(ProtocolConstants.MINECRAFT_1_15, 0x5A) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     EntityRemoveEffect.class,
+@@ -120,7 +126,8 @@ public enum Protocol
+                     map(ProtocolConstants.MINECRAFT_1_12, 0x32),
+                     map(ProtocolConstants.MINECRAFT_1_12_1, 0x33),
+                     map(ProtocolConstants.MINECRAFT_1_13, 0x36),
+-                    map(ProtocolConstants.MINECRAFT_1_14, 0x38)
++                    map(ProtocolConstants.MINECRAFT_1_14, 0x38),
++                    map(ProtocolConstants.MINECRAFT_1_15, 0x39)
+             );
+             // Waterfall end
+             TO_CLIENT.registerPacket(
+@@ -129,14 +136,16 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_9, 0x2D ),
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x2E ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x30 ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x33 )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x33 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x34) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     TabCompleteResponse.class,
+                     TabCompleteResponse::new, // Waterfall - speed up packet construction
+                     map( ProtocolConstants.MINECRAFT_1_7_2, 0x3A ), // Travertine
+                     map( ProtocolConstants.MINECRAFT_1_9, 0x0E ),
+-                    map( ProtocolConstants.MINECRAFT_1_13, 0x10 )
++                    map( ProtocolConstants.MINECRAFT_1_13, 0x10 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x11) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     ScoreboardObjective.class,
+@@ -146,7 +155,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12, 0x41 ),
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x42 ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x45 ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x49 )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x49 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x4A )
+             );
+             TO_CLIENT.registerPacket(
+                     ScoreboardScore.class,
+@@ -156,7 +166,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12, 0x44 ),
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x45 ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x48 ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x4C )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x4C ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x4D ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     ScoreboardDisplay.class,
+@@ -166,7 +177,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12, 0x3A ),
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x3B ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x3E ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x42 )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x42 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x43 ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     Team.class,
+@@ -176,7 +188,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12, 0x43 ),
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x44 ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x47 ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x4B )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x4B ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x4C ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     PluginMessage.class,
+@@ -184,7 +197,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_7_2, 0x3F ), // Travertine
+                     map( ProtocolConstants.MINECRAFT_1_9, 0x18 ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x19 ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x18 )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x18 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x19 ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     Kick.class,
+@@ -192,7 +206,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_7_2, 0x40 ), // Travertine
+                     map( ProtocolConstants.MINECRAFT_1_9, 0x1A ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x1B ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x1A )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x1A ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x1B ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     Title.class,
+@@ -201,7 +216,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12, 0x47 ),
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x48 ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x4B ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x4F )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x4F ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x50 ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     PlayerListHeaderFooter.class,
+@@ -212,7 +228,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12, 0x49 ),
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x4A ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x4E ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x53 )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x53 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x54 ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     EntityStatus.class,
+@@ -220,16 +237,19 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_7_2, 0x1A ), // Travertine
+                     map( ProtocolConstants.MINECRAFT_1_9, 0x1B ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x1C ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x1B )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x1B ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x1C ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     Commands.class,
+                     Commands::new, // Waterfall - speed up packet construction
+-                    map( ProtocolConstants.MINECRAFT_1_13, 0x11 )
++                    map( ProtocolConstants.MINECRAFT_1_13, 0x11 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x12 ) // Travertine
+             );
+             TO_CLIENT.registerPacket(
+                     ViewDistance.class,
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x41 )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x41 ),
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x42 ) // Travertine
+             );
+ 
+             TO_SERVER.registerPacket(
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java b/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java
+index ba6faa8d..63721162 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java
+@@ -27,6 +27,7 @@ public class ProtocolConstants
+     public static final int MINECRAFT_1_14_2 = 485;
+     public static final int MINECRAFT_1_14_3 = 490;
+     public static final int MINECRAFT_1_14_4 = 498;
++    public static final int MINECRAFT_1_15 = 573;
+     public static final List<String> SUPPORTED_VERSIONS = Arrays.asList(
+             "1.7.x",
+             "1.8.x",
+@@ -58,7 +59,8 @@ public class ProtocolConstants
+             ProtocolConstants.MINECRAFT_1_14_1,
+             ProtocolConstants.MINECRAFT_1_14_2,
+             ProtocolConstants.MINECRAFT_1_14_3,
+-            ProtocolConstants.MINECRAFT_1_14_4
++            ProtocolConstants.MINECRAFT_1_14_4,
++            ProtocolConstants.MINECRAFT_1_15
+     );
+ 
+     public static final boolean isBeforeOrEq(int before, int other)
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Login.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Login.java
+index b914cb3f..3baccdbf 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Login.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Login.java
+@@ -19,11 +19,13 @@ public class Login extends DefinedPacket
+     private int entityId;
+     private short gameMode;
+     private int dimension;
++    private long hashedSeed;
+     private short difficulty;
+     private short maxPlayers;
+     private String levelType;
+     private int viewDistance;
+     private boolean reducedDebugInfo;
++    private boolean enableRespawnScreen;
+ 
+     @Override
+     public void read(ByteBuf buf, ProtocolConstants.Direction direction, int protocolVersion)
+@@ -37,6 +39,9 @@ public class Login extends DefinedPacket
+         {
+             dimension = buf.readByte();
+         }
++        if (protocolVersion >= ProtocolConstants.MINECRAFT_1_15) {
++            hashedSeed = buf.readLong();
++        }
+         if ( protocolVersion < ProtocolConstants.MINECRAFT_1_14 )
+         {
+             difficulty = buf.readUnsignedByte();
+@@ -51,6 +56,9 @@ public class Login extends DefinedPacket
+         {
+             reducedDebugInfo = buf.readBoolean();
+         }
++        if (protocolVersion >= ProtocolConstants.MINECRAFT_1_15 ) {
++            enableRespawnScreen = buf.readBoolean();
++        }
+     }
+ 
+     @Override
+@@ -65,6 +73,10 @@ public class Login extends DefinedPacket
+         {
+             buf.writeByte( dimension );
+         }
++        if (protocolVersion >= ProtocolConstants.MINECRAFT_1_15) {
++            buf.writeLong(hashedSeed);
++        }
++
+         if ( protocolVersion < ProtocolConstants.MINECRAFT_1_14 )
+         {
+             buf.writeByte( difficulty );
+@@ -79,6 +91,9 @@ public class Login extends DefinedPacket
+         {
+             buf.writeBoolean( reducedDebugInfo );
+         }
++        if (protocolVersion >= ProtocolConstants.MINECRAFT_1_15) {
++            buf.writeBoolean(enableRespawnScreen);
++        }
+     }
+ 
+     @Override
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Respawn.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Respawn.java
+index dbb24e22..00fcf4d7 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Respawn.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Respawn.java
+@@ -18,6 +18,7 @@ public class Respawn extends DefinedPacket
+ 
+     private int dimension;
+     private short difficulty;
++    private long hashedSeed;
+     private short gameMode;
+     private String levelType;
+ 
+@@ -29,6 +30,9 @@ public class Respawn extends DefinedPacket
+         {
+             difficulty = buf.readUnsignedByte();
+         }
++        if (protocolVersion >= ProtocolConstants.MINECRAFT_1_15 ) {
++            hashedSeed = buf.readLong();
++        }
+         gameMode = buf.readUnsignedByte();
+         levelType = readString( buf );
+     }
+@@ -41,6 +45,9 @@ public class Respawn extends DefinedPacket
+         {
+             buf.writeByte( difficulty );
+         }
++        if (protocolVersion >= ProtocolConstants.MINECRAFT_1_15) {
++            buf.writeLong(hashedSeed);
++        }
+         buf.writeByte( gameMode );
+         writeString( levelType, buf );
+     }
+diff --git a/proxy/src/main/java/net/md_5/bungee/PacketConstants.java b/proxy/src/main/java/net/md_5/bungee/PacketConstants.java
+index ea6aa6a8..3afba280 100644
+--- a/proxy/src/main/java/net/md_5/bungee/PacketConstants.java
++++ b/proxy/src/main/java/net/md_5/bungee/PacketConstants.java
+@@ -7,8 +7,8 @@ import net.md_5.bungee.protocol.packet.Respawn;
+ public class PacketConstants
+ {
+ 
+-    public static final Respawn DIM1_SWITCH = new Respawn( (byte) 1, (byte) 0, (byte) 0, "default" );
+-    public static final Respawn DIM2_SWITCH = new Respawn( (byte) -1, (byte) 0, (byte) 0, "default" );
++    public static final Respawn DIM1_SWITCH = new Respawn( (byte) 1, (byte) 0, 0l, (byte) 0, "default" );
++    public static final Respawn DIM2_SWITCH = new Respawn( (byte) -1, (byte) 0, 0l, (byte) 0, "default" );
+     public static final ClientStatus CLIENT_LOGIN = new ClientStatus( (byte) 0 );
+     public static final PluginMessage FORGE_MOD_REQUEST = new PluginMessage( "FML", new byte[]
+     {
+diff --git a/proxy/src/main/java/net/md_5/bungee/ServerConnector.java b/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
+index a92b979a..c3eafdd1 100644
+--- a/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
++++ b/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
+@@ -244,8 +244,8 @@ public class ServerConnector extends PacketHandler
+             user.setServerEntityId( login.getEntityId() );
+ 
+             // Set tab list size, TODO: what shall we do about packet mutability
+-            Login modLogin = new Login( login.getEntityId(), login.getGameMode(), (byte) login.getDimension(), login.getDifficulty(),
+-                    (byte) user.getPendingConnection().getListener().getTabListSize(), login.getLevelType(), login.getViewDistance(), login.isReducedDebugInfo() );
++            Login modLogin = new Login( login.getEntityId(), login.getGameMode(), (byte) login.getDimension(), login.getHashedSeed(), login.getDifficulty(),
++                    (byte) user.getPendingConnection().getListener().getTabListSize(), login.getLevelType(), login.getViewDistance(), login.isReducedDebugInfo(), login.isEnableRespawnScreen() );
+ 
+             user.unsafe().sendPacket( modLogin );
+ 
+@@ -300,7 +300,7 @@ public class ServerConnector extends PacketHandler
+             user.setDimensionChange( true );
+             if ( !user.isDisableEntityMetadataRewrite() && login.getDimension() == user.getDimension() ) // Waterfall - defer
+             {
+-                user.unsafe().sendPacket( new Respawn( ( login.getDimension() >= 0 ? -1 : 0 ), login.getDifficulty(), login.getGameMode(), login.getLevelType() ) );
++                user.unsafe().sendPacket( new Respawn( ( login.getDimension() >= 0 ? -1 : 0 ), login.getDifficulty(), login.getHashedSeed(), login.getGameMode(), login.getLevelType() ) );
+             }
+ 
+             user.setServerEntityId( login.getEntityId() );
+@@ -311,20 +311,20 @@ public class ServerConnector extends PacketHandler
+ 
+                 // Only send if we are not in the same dimension
+                 if (user.getDimension() != login.getDimension()) {
+-                    user.unsafe().sendPacket( new Respawn(user.getDimension() == 0 ? -1 : 0, login.getDifficulty(), login.getGameMode(), login.getLevelType()));
++                    user.unsafe().sendPacket( new Respawn(user.getDimension() == 0 ? -1 : 0, login.getDifficulty(), login.getHashedSeed(), login.getGameMode(), login.getLevelType()));
+                 }
+ 
+-                Login modLogin = new Login( login.getEntityId(),login.getGameMode(), login.getDimension(),
+-                        login.getDifficulty(), login.getMaxPlayers(), login.getLevelType(), login.getViewDistance(), login.isReducedDebugInfo() );
++                Login modLogin = new Login( login.getEntityId(),login.getGameMode(), login.getDimension(), login.getHashedSeed(),
++                        login.getDifficulty(), login.getMaxPlayers(), login.getLevelType(), login.getViewDistance(), login.isReducedDebugInfo(), login.isEnableRespawnScreen() );
+                 user.unsafe().sendPacket(modLogin);
+ 
+                 // Only send if we're in the same dimension
+                 if (user.getDimension() == login.getDimension()) {
+-                    user.unsafe().sendPacket( new Respawn(user.getDimension() == 0 ? -1 : 0, login.getDifficulty(), login.getGameMode(), login.getLevelType()));
++                    user.unsafe().sendPacket( new Respawn(user.getDimension() == 0 ? -1 : 0, login.getDifficulty(), login.getHashedSeed(), login.getGameMode(), login.getLevelType()));
+                 }
+             }
+             // Waterfall end
+-            user.unsafe().sendPacket( new Respawn( login.getDimension(), login.getDifficulty(), login.getGameMode(), login.getLevelType() ) );
++            user.unsafe().sendPacket( new Respawn( login.getDimension(), login.getDifficulty(), login.getHashedSeed(), login.getGameMode(), login.getLevelType() ) );
+             if ( user.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_1_14 )
+             {
+                 user.unsafe().sendPacket( new ViewDistance( login.getViewDistance() ) );
+diff --git a/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap.java b/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap.java
+index f09dc2aa..397979b3 100644
+--- a/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap.java
++++ b/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap.java
+@@ -29,7 +29,7 @@ public abstract class EntityMap
+     public static EntityMap getEntityMap(int version)
+     {
+         // Waterfall start
+-        if (net.md_5.bungee.api.ProxyServer.getInstance().getConfig().isDisableEntityMetadataRewrite()) {
++        if (net.md_5.bungee.api.ProxyServer.getInstance().getConfig().isDisableEntityMetadataRewrite() || version == ProtocolConstants.MINECRAFT_1_15) {
+             return EntityMap_Dummy.INSTANCE;
+         }
+         // Waterfall end
+-- 
+2.24.0
+
