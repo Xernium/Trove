@@ -1,0 +1,635 @@
+From f186e484261bd8c1cb3430f144a070c6c10e7daf Mon Sep 17 00:00:00 2001
+From: "Five (Xer)" <admin@xernium.com>
+Date: Thu, 14 May 2020 11:50:07 +0200
+Subject: [PATCH] Travertine 1.16
+
+
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/DefinedPacket.java b/protocol/src/main/java/net/md_5/bungee/protocol/DefinedPacket.java
+index 5272d861..7f7176c5 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/DefinedPacket.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/DefinedPacket.java
+@@ -11,6 +11,21 @@ import lombok.RequiredArgsConstructor;
+ public abstract class DefinedPacket
+ {
+ 
++    // Travertine (1.16) new UUID reader/writer start
++    public static void writeUUIDIntArray(UUID u, ByteBuf buf)
++    {
++        buf.writeInt((int) (u.getMostSignificantBits() >> 32));
++        buf.writeInt((int) u.getMostSignificantBits());
++        buf.writeInt((int) (u.getLeastSignificantBits() >> 32));
++        buf.writeInt((int) u.getLeastSignificantBits());
++    }
++
++    public static UUID readUUIDIntArray(ByteBuf buf)
++    {
++        return new UUID((long) buf.readInt() << 32 | ((long) buf.readInt() & 0xFFFFFFFFL), (long) buf.readInt() << 32 | ((long) buf.readInt() & 0xFFFFFFFFL));
++    }
++    // Travertine end
++
+     public static void writeString(String s, ByteBuf buf)
+     {
+         if ( s.length() > Short.MAX_VALUE )
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java b/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
+index 191f0504..6b9bb861 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
+@@ -157,7 +157,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x42 ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x45 ),
+                     map( ProtocolConstants.MINECRAFT_1_14, 0x49 ),
+-                    map( ProtocolConstants.MINECRAFT_1_15, 0x4A )
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x4A ),
++                    map( ProtocolConstants.MINECRAFT_1_16, 0x4B ) // Travertine (1.16: 20w12a+ 0x4A -> 0x4B)
+             );
+             TO_CLIENT.registerPacket(
+                     ScoreboardScore.class,
+@@ -168,7 +169,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x45 ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x48 ),
+                     map( ProtocolConstants.MINECRAFT_1_14, 0x4C ),
+-                    map( ProtocolConstants.MINECRAFT_1_15, 0x4D )
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x4D ),
++                    map( ProtocolConstants.MINECRAFT_1_16, 0x4E ) // Travertine (1.16: 20w12a+ 0x4D -> 0x4E)
+             );
+             TO_CLIENT.registerPacket(
+                     ScoreboardDisplay.class,
+@@ -179,7 +181,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x3B ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x3E ),
+                     map( ProtocolConstants.MINECRAFT_1_14, 0x42 ),
+-                    map( ProtocolConstants.MINECRAFT_1_15, 0x43 )
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x43 ),
++                    map( ProtocolConstants.MINECRAFT_1_16, 0x44 ) // Travertine (1.16: 20w12a+ 0x43 -> 0x44)
+             );
+             TO_CLIENT.registerPacket(
+                     Team.class,
+@@ -190,7 +193,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x44 ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x47 ),
+                     map( ProtocolConstants.MINECRAFT_1_14, 0x4B ),
+-                    map( ProtocolConstants.MINECRAFT_1_15, 0x4C )
++                    map( ProtocolConstants.MINECRAFT_1_15, 0x4C ),
++                    map( ProtocolConstants.MINECRAFT_1_16, 0x4D ) // Travertine (1.16: 20w12a+ 0x4C -> 0x4D)
+             );
+             TO_CLIENT.registerPacket(
+                     PluginMessage.class,
+@@ -267,7 +271,8 @@ public enum Protocol
+                     map( ProtocolConstants.MINECRAFT_1_12, 0x0C ),
+                     map( ProtocolConstants.MINECRAFT_1_12_1, 0x0B ),
+                     map( ProtocolConstants.MINECRAFT_1_13, 0x0E ),
+-                    map( ProtocolConstants.MINECRAFT_1_14, 0x0F )
++                    map( ProtocolConstants.MINECRAFT_1_14, 0x0F ),
++                    map( ProtocolConstants.MINECRAFT_1_16, 0x10 ) // Travertine (1.16: 20w16a+ 0x0F -> 0x10)
+             );
+             TO_SERVER.registerPacket(
+                     Chat.class,
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java b/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java
+index 05f65a80..b11e77e8 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java
+@@ -30,6 +30,7 @@ public class ProtocolConstants
+     public static final int MINECRAFT_1_15 = 573;
+     public static final int MINECRAFT_1_15_1 = 575;
+     public static final int MINECRAFT_1_15_2 = 578;
++    public static final int MINECRAFT_1_16 = 716; // Travertine (1.16 - 20w20a)
+     public static final List<String> SUPPORTED_VERSIONS = Arrays.asList(
+             "1.7.x",
+             "1.8.x",
+@@ -39,7 +40,8 @@ public class ProtocolConstants
+             "1.12.x",
+             "1.13.x",
+             "1.14.x",
+-            "1.15.x"
++            "1.15.x",
++            "1.16" // Travertine (1.16)
+     );
+     public static final List<Integer> SUPPORTED_VERSION_IDS = Arrays.asList(
+             ProtocolConstants.MINECRAFT_1_7_2,
+@@ -65,7 +67,8 @@ public class ProtocolConstants
+             ProtocolConstants.MINECRAFT_1_14_4,
+             ProtocolConstants.MINECRAFT_1_15,
+             ProtocolConstants.MINECRAFT_1_15_1,
+-            ProtocolConstants.MINECRAFT_1_15_2
++            ProtocolConstants.MINECRAFT_1_15_2,
++            ProtocolConstants.MINECRAFT_1_16 // Travertine 1.16
+     );
+ 
+     public static final boolean isBeforeOrEq(int before, int other)
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Commands.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Commands.java
+index 2f14d074..e64dad57 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Commands.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Commands.java
+@@ -547,6 +547,7 @@ public class Commands extends DefinedPacket
+             PROVIDERS.put( "minecraft:entity_summon", VOID );
+             PROVIDERS.put( "minecraft:dimension", VOID );
+             PROVIDERS.put( "minecraft:time", VOID ); // 1.14
++            PROVIDERS.put( "minecraft:uuid", VOID ); // Travertine (1.16: 20w17a+)
+         }
+ 
+         private static ArgumentType<?> read(String key, ByteBuf buf)
+@@ -618,6 +619,7 @@ public class Commands extends DefinedPacket
+             registerDummy( "minecraft:all_recipes" );
+             registerDummy( "minecraft:available_sounds" );
+             registerDummy( "minecraft:summonable_entities" );
++            registerDummy( "minecraft:available_biomes" ); // Travertine (1.16: 20w06a)
+         }
+ 
+         private static void registerDummy(String name)
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Login.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Login.java
+index e0cdf82e..55f173de 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Login.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Login.java
+@@ -26,6 +26,8 @@ public class Login extends DefinedPacket
+     private int viewDistance;
+     private boolean reducedDebugInfo;
+     private boolean normalRespawn;
++    private boolean isDebug; // Travertine (1.16: 20w20a+)
++    private boolean isFlat; // Travertine (1.16: 20w20a+)
+ 
+     @Override
+     public void read(ByteBuf buf, ProtocolConstants.Direction direction, int protocolVersion)
+@@ -48,7 +50,12 @@ public class Login extends DefinedPacket
+             difficulty = buf.readUnsignedByte();
+         }
+         maxPlayers = buf.readUnsignedByte();
+-        levelType = readString( buf );
++        // Travertine (1.16: 20w20a+) start:
++        if( protocolVersion < ProtocolConstants.MINECRAFT_1_16 )
++        {
++            levelType = readString( buf );
++        }
++        // Travertine end
+         if ( protocolVersion >= ProtocolConstants.MINECRAFT_1_14 )
+         {
+             viewDistance = readVarInt( buf );
+@@ -61,6 +68,13 @@ public class Login extends DefinedPacket
+         {
+             normalRespawn = buf.readBoolean();
+         }
++        // Travertine (1.16: 20w20a+) start:
++        if( protocolVersion >= ProtocolConstants.MINECRAFT_1_16 )
++        {
++            isDebug = buf.readBoolean();
++            isFlat = buf.readBoolean();
++        }
++        // Travertine end
+     }
+ 
+     @Override
+@@ -84,7 +98,12 @@ public class Login extends DefinedPacket
+             buf.writeByte( difficulty );
+         }
+         buf.writeByte( maxPlayers );
+-        writeString( levelType, buf );
++        // Travertine (1.16: 20w20a) start:
++        if( protocolVersion < ProtocolConstants.MINECRAFT_1_16 )
++        {
++            writeString( levelType, buf );
++        }
++        // Travertine end
+         if ( protocolVersion >= ProtocolConstants.MINECRAFT_1_14 )
+         {
+             writeVarInt( viewDistance, buf );
+@@ -97,6 +116,13 @@ public class Login extends DefinedPacket
+         {
+             buf.writeBoolean( normalRespawn );
+         }
++        // Travertine (1.16: 20w20a) start:
++        if( protocolVersion >= ProtocolConstants.MINECRAFT_1_16 )
++        {
++            buf.writeBoolean( isDebug );
++            buf.writeBoolean( isFlat );
++        }
++        // Travertine end
+     }
+ 
+     @Override
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/LoginSuccess.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/LoginSuccess.java
+index 2aa5ad58..850a251b 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/LoginSuccess.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/packet/LoginSuccess.java
+@@ -7,6 +7,9 @@ import lombok.EqualsAndHashCode;
+ import lombok.NoArgsConstructor;
+ import net.md_5.bungee.protocol.AbstractPacketHandler;
+ import net.md_5.bungee.protocol.DefinedPacket;
++import net.md_5.bungee.protocol.ProtocolConstants;
++
++import java.util.UUID;
+ 
+ @Data
+ @NoArgsConstructor
+@@ -17,18 +20,33 @@ public class LoginSuccess extends DefinedPacket
+ 
+     private String uuid;
+     private String username;
++    private int protocolVersion; // Travertine (1.16: 20w12a+)
+ 
+     @Override
+     public void read(ByteBuf buf)
+     {
+-        uuid = readString( buf );
++        // Travertine (1.16: 20w12a UUID is now a four-int array) start
++        if( protocolVersion >= ProtocolConstants.MINECRAFT_1_16 )
++        {
++            uuid = readUUIDIntArray( buf ).toString();
++        } else {
++            uuid = readString( buf );
++        }
++        // Travertine end
+         username = readString( buf );
+     }
+ 
+     @Override
+     public void write(ByteBuf buf)
+     {
+-        writeString( uuid, buf );
++        // Travertine (1.16: 20w12a UUID is now a four-int array) start
++        if( protocolVersion >= ProtocolConstants.MINECRAFT_1_16 )
++        {
++            writeUUIDIntArray( UUID.fromString( uuid ), buf);
++        } else {
++            writeString( uuid, buf );
++        }
++        // Travertine end
+         writeString( username, buf );
+     }
+ 
+@@ -37,4 +55,29 @@ public class LoginSuccess extends DefinedPacket
+     {
+         handler.handle( this );
+     }
++
++    // Travertine (1.16: 20w12a forward protocol version) start
++    @Override
++    public void read(ByteBuf buf, ProtocolConstants.Direction direction, int protocolVersion){
++        this.protocolVersion = protocolVersion;
++        read(buf);
++    }
++
++    @Override
++    public void read0(ByteBuf buf, ProtocolConstants.Direction direction, int protocolVersion){
++        this.protocolVersion = protocolVersion;
++        read(buf);
++    }
++
++    @Override
++    public void write(ByteBuf buf, ProtocolConstants.Direction direction, int protocolVersion){
++        this.protocolVersion = protocolVersion;
++        write(buf);
++    }
++
++    public void write0(ByteBuf buf, ProtocolConstants.Direction direction, int protocolVersion){
++        this.protocolVersion = protocolVersion;
++        write(buf);
++    }
++    // Travertine end
+ }
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Respawn.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Respawn.java
+index 1f544f26..710021be 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Respawn.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Respawn.java
+@@ -21,6 +21,9 @@ public class Respawn extends DefinedPacket
+     private short difficulty;
+     private short gameMode;
+     private String levelType;
++    private boolean keepAllPlayerData; // Travertine (1.16: 20w18a)
++    private boolean isDebug; // Travertine (1.16: 20w20a)
++    private boolean isFlat; // Travertine (1.16: 20w20a)
+ 
+     @Override
+     public void read(ByteBuf buf, ProtocolConstants.Direction direction, int protocolVersion)
+@@ -35,7 +38,17 @@ public class Respawn extends DefinedPacket
+             difficulty = buf.readUnsignedByte();
+         }
+         gameMode = buf.readUnsignedByte();
+-        levelType = readString( buf );
++        // Travertine (1.16: 20w20) start:
++        if( protocolVersion >= ProtocolConstants.MINECRAFT_1_16 )
++        {
++            isDebug = buf.readBoolean();
++            isFlat = buf.readBoolean();
++            keepAllPlayerData = buf.readBoolean();
++        } else
++        {
++            levelType = readString( buf );
++        }
++        // Travertine end
+     }
+ 
+     @Override
+@@ -51,7 +64,17 @@ public class Respawn extends DefinedPacket
+             buf.writeByte( difficulty );
+         }
+         buf.writeByte( gameMode );
+-        writeString( levelType, buf );
++        // Travertine (1.16: 20w18a) start:
++        if( protocolVersion >= ProtocolConstants.MINECRAFT_1_16 )
++        {
++            buf.writeBoolean( isDebug );
++            buf.writeBoolean( isFlat );
++            buf.writeBoolean( keepAllPlayerData );
++        } else
++        {
++            writeString( levelType, buf );
++        }
++        // Travertine end
+     }
+ 
+     @Override
+diff --git a/proxy/src/main/java/net/md_5/bungee/PacketConstants.java b/proxy/src/main/java/net/md_5/bungee/PacketConstants.java
+index 000c450e..126e6c43 100644
+--- a/proxy/src/main/java/net/md_5/bungee/PacketConstants.java
++++ b/proxy/src/main/java/net/md_5/bungee/PacketConstants.java
+@@ -7,8 +7,8 @@ import net.md_5.bungee.protocol.packet.Respawn;
+ public class PacketConstants
+ {
+ 
+-    public static final Respawn DIM1_SWITCH = new Respawn( (byte) 1, 0, (byte) 0, (byte) 0, "default" );
+-    public static final Respawn DIM2_SWITCH = new Respawn( (byte) -1, 0, (byte) 0, (byte) 0, "default" );
++    public static final Respawn DIM1_SWITCH = new Respawn( (byte) 1, 0, (byte) 0, (byte) 0, "default", false, /* Travertine (1.16: 20w18a+) */ false, false /* Travertine 1.16 (20w20a+)*/);
++    public static final Respawn DIM2_SWITCH = new Respawn( (byte) -1, 0, (byte) 0, (byte) 0, "default", false, /* Travertine (1.16: 20w18a+) */ false, false /* Travertine 1.16 (20w20a+)*/ );
+     public static final ClientStatus CLIENT_LOGIN = new ClientStatus( (byte) 0 );
+     public static final PluginMessage FORGE_MOD_REQUEST = new PluginMessage( "FML", new byte[]
+     {
+diff --git a/proxy/src/main/java/net/md_5/bungee/ServerConnector.java b/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
+index 53ef99cd..1b0fb221 100644
+--- a/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
++++ b/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
+@@ -247,7 +247,7 @@ public class ServerConnector extends PacketHandler
+ 
+             // Set tab list size, TODO: what shall we do about packet mutability
+             Login modLogin = new Login( login.getEntityId(), login.getGameMode(), (byte) login.getDimension(), login.getSeed(), login.getDifficulty(),
+-                    (byte) user.getPendingConnection().getListener().getTabListSize(), login.getLevelType(), login.getViewDistance(), login.isReducedDebugInfo(), login.isNormalRespawn() );
++                    (byte) user.getPendingConnection().getListener().getTabListSize(), login.getLevelType(), login.getViewDistance(), login.isReducedDebugInfo(), login.isNormalRespawn(), false, false /* Travertine 1.16 (20w20a+)*/);
+ 
+             user.unsafe().sendPacket( modLogin );
+ 
+@@ -307,7 +307,7 @@ public class ServerConnector extends PacketHandler
+             user.setDimensionChange( true );
+             if ( !user.isDisableEntityMetadataRewrite() && login.getDimension() == user.getDimension() ) // Waterfall - defer
+             {
+-                user.unsafe().sendPacket( new Respawn( ( login.getDimension() >= 0 ? -1 : 0 ), login.getSeed(), login.getDifficulty(), login.getGameMode(), login.getLevelType() ) );
++                user.unsafe().sendPacket( new Respawn( ( login.getDimension() >= 0 ? -1 : 0 ), login.getSeed(), login.getDifficulty(), login.getGameMode(), login.getLevelType(), false, /* Travertine (1.16: 20w18a+) */ false, false /* Travertine 1.16 (20w20a+)*/ ) );
+             }
+ 
+             user.setServerEntityId( login.getEntityId() );
+@@ -319,20 +319,20 @@ public class ServerConnector extends PacketHandler
+ 
+                 // Only send if we are not in the same dimension
+                 if (user.getDimension() != login.getDimension()) {
+-                    user.unsafe().sendPacket( new Respawn(user.getDimension() == 0 ? -1 : 0, login.getSeed(), login.getDifficulty(), login.getGameMode(), login.getLevelType()));
++                    user.unsafe().sendPacket( new Respawn(user.getDimension() == 0 ? -1 : 0, login.getSeed(), login.getDifficulty(), login.getGameMode(), login.getLevelType(), false, /* Travertine (1.16: 20w18a+) */ false, false /* Travertine 1.16 (20w20a+)*/));
+                 }
+ 
+                 Login modLogin = new Login( login.getEntityId(),login.getGameMode(), login.getDimension(), login.getSeed(),
+-                        login.getDifficulty(), login.getMaxPlayers(), login.getLevelType(), login.getViewDistance(), login.isReducedDebugInfo(), login.isNormalRespawn() );
++                        login.getDifficulty(), login.getMaxPlayers(), login.getLevelType(), login.getViewDistance(), login.isReducedDebugInfo(), login.isNormalRespawn(), false, false /* Travertine 1.16 (20w20a+)*/);
+                 user.unsafe().sendPacket(modLogin);
+ 
+                 // Only send if we're in the same dimension
+                 if (user.getDimension() == login.getDimension()) {
+-                    user.unsafe().sendPacket( new Respawn(user.getDimension() == 0 ? -1 : 0, login.getSeed(), login.getDifficulty(), login.getGameMode(), login.getLevelType()));
++                    user.unsafe().sendPacket( new Respawn(user.getDimension() == 0 ? -1 : 0, login.getSeed(), login.getDifficulty(), login.getGameMode(), login.getLevelType(), false, /* Travertine (1.16: 20w18a+) */ false, false /* Travertine 1.16 (20w20a+)*/));
+                 }
+             }
+             // Waterfall end
+-            user.unsafe().sendPacket( new Respawn( login.getDimension(), login.getSeed(), login.getDifficulty(), login.getGameMode(), login.getLevelType() ) );
++            user.unsafe().sendPacket( new Respawn( login.getDimension(), login.getSeed(), login.getDifficulty(), login.getGameMode(), login.getLevelType(), false, /* Travertine (1.16: 20w18a+) */ false, false /* Travertine 1.16 (20w20a+)*/ ) );
+             if ( user.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_1_14 )
+             {
+                 user.unsafe().sendPacket( new ViewDistance( login.getViewDistance() ) );
+diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
+index b1c37a55..038d7471 100644
+--- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
++++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
+@@ -562,10 +562,10 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+                             // Travertine start
+                             if ( ProtocolConstants.isAfterOrEq( getVersion() , ProtocolConstants.MINECRAFT_1_7_6 ) )
+                             {
+-                                unsafe.sendPacket( new LoginSuccess( getUniqueId().toString(), getName() ) ); // With dashes in between
++                                unsafe.sendPacket( new LoginSuccess( getUniqueId().toString(), getName(), getVersion() /* Travertine (1.16: 20w12a+) */) ); // With dashes in between
+                             } else
+                             {
+-                                unsafe.sendPacket( new LoginSuccess( getUUID(), getName() ) ); // Without dashes, for older clients.
++                                unsafe.sendPacket( new LoginSuccess( getUUID(), getName(), getVersion() /* Travertine (1.16: 20w12a+) */) ); // Without dashes, for older clients.
+                             }
+                             // Travertine end
+                             ch.setProtocol( Protocol.GAME );
+diff --git a/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap.java b/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap.java
+index 73b05167..a510d0d0 100644
+--- a/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap.java
++++ b/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap.java
+@@ -71,6 +71,8 @@ public abstract class EntityMap
+             case ProtocolConstants.MINECRAFT_1_15_1:
+             case ProtocolConstants.MINECRAFT_1_15_2:
+                 return EntityMap_1_15.INSTANCE;
++            case ProtocolConstants.MINECRAFT_1_16: // Travertine 1.16
++                return EntityMap_1_16.INSTANCE; // Travertine 1.16
+         }
+         throw new RuntimeException( "Version " + version + " has no entity map" );
+     }
+diff --git a/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap_1_16.java b/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap_1_16.java
+new file mode 100644
+index 00000000..b65cc258
+--- /dev/null
++++ b/proxy/src/main/java/net/md_5/bungee/entitymap/EntityMap_1_16.java
+@@ -0,0 +1,194 @@
++// Travertine start
++package net.md_5.bungee.entitymap;
++
++import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
++import io.netty.buffer.ByteBuf;
++import net.md_5.bungee.BungeeCord;
++import net.md_5.bungee.UserConnection;
++import net.md_5.bungee.api.connection.ProxiedPlayer;
++import net.md_5.bungee.protocol.DefinedPacket;
++import net.md_5.bungee.protocol.ProtocolConstants;
++
++import java.util.UUID;
++
++class EntityMap_1_16 extends EntityMap
++{
++
++    static final EntityMap_1_16 INSTANCE = new EntityMap_1_16();
++
++    EntityMap_1_16()
++    {
++        addRewrite( 0x00, ProtocolConstants.Direction.TO_CLIENT, true ); // Spawn Object : PacketPlayOutSpawnEntity
++        addRewrite( 0x01, ProtocolConstants.Direction.TO_CLIENT, true ); // Spawn Experience Orb : PacketPlayOutSpawnEntityExperienceOrb
++        addRewrite( 0x03, ProtocolConstants.Direction.TO_CLIENT, true ); // Spawn Mob : PacketPlayOutSpawnEntityLiving
++        addRewrite( 0x04, ProtocolConstants.Direction.TO_CLIENT, true ); // Spawn Painting : PacketPlayOutSpawnEntityPainting
++        addRewrite( 0x05, ProtocolConstants.Direction.TO_CLIENT, true ); // Spawn Player : PacketPlayOutNamedEntitySpawn
++        addRewrite( 0x06, ProtocolConstants.Direction.TO_CLIENT, true ); // Animation : PacketPlayOutAnimation
++        addRewrite( 0x09, ProtocolConstants.Direction.TO_CLIENT, true ); // Block Break Animation : PacketPlayOutBlockBreakAnimation
++        addRewrite( 0x1C, ProtocolConstants.Direction.TO_CLIENT, false ); // Entity Status : PacketPlayOutEntityStatus
++        addRewrite( 0x29, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Relative Move : PacketPlayOutRelEntityMove
++        addRewrite( 0x2A, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Look and Relative Move : PacketPlayOutRelEntityMoveLook
++        addRewrite( 0x2B, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Look : PacketPlayOutEntityLook
++        addRewrite( 0x2C, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity : PacketPlayOutEntity
++        addRewrite( 0x39, ProtocolConstants.Direction.TO_CLIENT, true ); // Remove Entity Effect : PacketPlayOutRemoveEntityEffect
++        addRewrite( 0x3C, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Head Look : PacketPlayOutEntityHeadRotation
++        addRewrite( 0x3F, ProtocolConstants.Direction.TO_CLIENT, true ); // Camera : PacketPlayOutCamera
++        /* Travertine (1.16: 20w12a+ 0x44 -> 0x45) */ addRewrite( 0x45, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Metadata : PacketPlayOutEntityMetadata
++        /* Travertine (1.16: 20w12a+ 0x45 -> 0x46) */ addRewrite( 0x46, ProtocolConstants.Direction.TO_CLIENT, false ); // Attach Entity : PacketPlayOutAttachEntity
++        /* Travertine (1.16: 20w12a+ 0x46 -> 0x47) */ addRewrite( 0x47, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Velocity : PacketPlayOutEntityVelocity
++        /* Travertine (1.16: 20w12a+ 0x47 -> 0x48) */ addRewrite( 0x48, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Equipment : PacketPlayOutEntityEquipment
++        /* Travertine (1.16: 20w12a+ 0x4B -> 0x4C) */ addRewrite( 0x4C, ProtocolConstants.Direction.TO_CLIENT, true ); // Set Passengers : PacketPlayOutMount
++        addRewrite( 0x56, ProtocolConstants.Direction.TO_CLIENT, true ); // Collect Item : PacketPlayOutCollect
++        addRewrite( 0x57, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Teleport : PacketPlayOutEntityTeleport
++        addRewrite( 0x59, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Properties : PacketPlayOutUpdateAttributes
++        addRewrite( 0x5A, ProtocolConstants.Direction.TO_CLIENT, true ); // Entity Effect : PacketPlayOutEntityEffect
++
++        addRewrite( 0x0E, ProtocolConstants.Direction.TO_SERVER, true ); // Use Entity : PacketPlayInUseEntity
++        /* Travertine (1.16: 20w16a+ 0x1B -> 0x1C) */  addRewrite( 0x1C, ProtocolConstants.Direction.TO_SERVER, true ); // Entity Action : PacketPlayInEntityAction
++    }
++
++    @Override
++    @SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
++    public void rewriteClientbound(ByteBuf packet, int oldId, int newId, int protocolVersion)
++    {
++        super.rewriteClientbound( packet, oldId, newId );
++
++        // Special cases
++        int readerIndex = packet.readerIndex();
++        int packetId = DefinedPacket.readVarInt( packet );
++        int packetIdLength = packet.readerIndex() - readerIndex;
++        int jumpIndex = packet.readerIndex();
++        switch ( packetId )
++        {
++            /* Travertine (1.16: 20w12a+ 0x45 -> 0x46) */ case 0x46 /* Attach Entity : PacketPlayOutAttachEntity */:
++            rewriteInt( packet, oldId, newId, readerIndex + packetIdLength + 4 );
++            break;
++            case 0x56 /* Collect Item : PacketPlayOutCollect */:
++                DefinedPacket.readVarInt( packet );
++                rewriteVarInt( packet, oldId, newId, packet.readerIndex() );
++                break;
++            case 0x4C /* Set Passengers : PacketPlayOutMount */:
++                DefinedPacket.readVarInt( packet );
++                jumpIndex = packet.readerIndex();
++                // Fall through on purpose to int array of IDs
++            case 0x38 /* Destroy Entities : PacketPlayOutEntityDestroy */:
++                int count = DefinedPacket.readVarInt( packet );
++                int[] ids = new int[ count ];
++                for ( int i = 0; i < count; i++ )
++                {
++                    ids[i] = DefinedPacket.readVarInt( packet );
++                }
++                packet.readerIndex( jumpIndex );
++                packet.writerIndex( jumpIndex );
++                DefinedPacket.writeVarInt( count, packet );
++                for ( int id : ids )
++                {
++                    if ( id == oldId )
++                    {
++                        id = newId;
++                    } else if ( id == newId )
++                    {
++                        id = oldId;
++                    }
++                    DefinedPacket.writeVarInt( id, packet );
++                }
++                break;
++            case 0x00 /* Spawn Object : PacketPlayOutSpawnEntity */:
++                DefinedPacket.readVarInt( packet );
++                DefinedPacket.readUUID( packet );
++                int type = DefinedPacket.readVarInt( packet );
++
++                if ( type == 2 || type == 102 || type == 72 ) // arrow, fishing_bobber or spectral_arrow
++                {
++                    if ( type == 2 || type == 72 ) // arrow or spectral_arrow
++                    {
++                        oldId = oldId + 1;
++                        newId = newId + 1;
++                    }
++
++                    packet.skipBytes( 26 ); // double, double, double, byte, byte
++                    int position = packet.readerIndex();
++                    int readId = packet.readInt();
++                    if ( readId == oldId )
++                    {
++                        packet.setInt( position, newId );
++                    } else if ( readId == newId )
++                    {
++                        packet.setInt( position, oldId );
++                    }
++                }
++                break;
++            case 0x05 /* Spawn Player : PacketPlayOutNamedEntitySpawn */:
++                DefinedPacket.readVarInt( packet ); // Entity ID
++                int idLength = packet.readerIndex() - readerIndex - packetIdLength;
++                UUID uuid = DefinedPacket.readUUID( packet );
++                ProxiedPlayer player;
++                if ( ( player = BungeeCord.getInstance().getPlayerByOfflineUUID( uuid ) ) != null )
++                {
++                    int previous = packet.writerIndex();
++                    packet.readerIndex( readerIndex );
++                    packet.writerIndex( readerIndex + packetIdLength + idLength );
++                    DefinedPacket.writeUUID( player.getUniqueId(), packet );
++                    packet.writerIndex( previous );
++                }
++                break;
++            case 0x33 /* Combat Event : PacketPlayOutCombatEvent */:
++                int event = packet.readUnsignedByte();
++                if ( event == 1 /* End Combat*/ )
++                {
++                    DefinedPacket.readVarInt( packet );
++                    rewriteInt( packet, oldId, newId, packet.readerIndex() );
++                } else if ( event == 2 /* Entity Dead */ )
++                {
++                    int position = packet.readerIndex();
++                    rewriteVarInt( packet, oldId, newId, packet.readerIndex() );
++                    packet.readerIndex( position );
++                    DefinedPacket.readVarInt( packet );
++                    rewriteInt( packet, oldId, newId, packet.readerIndex() );
++                }
++                break;
++            /* Travertine (1.16: 20w12a+ 0x44 -> 0x45) */ case 0x45 /* EntityMetadata : PacketPlayOutEntityMetadata */:
++            DefinedPacket.readVarInt( packet ); // Entity ID
++            rewriteMetaVarInt( packet, oldId + 1, newId + 1, 7, protocolVersion ); // fishing hook
++            /*
++             * Travertine (1.16: 20w12a+)
++             * metaVarInt was shifted to 8 from 16 and 16 omitted, previously:
++             * rewriteMetaVarInt( packet, oldId, newId, 8, protocolVersion ); // fireworks (et al)
++             * */
++            rewriteMetaVarInt( packet, oldId, newId, 8, protocolVersion ); // guardian beam
++            break;
++            case 0x51 /* Entity Sound Effect : PacketPlayOutEntitySound */:
++                DefinedPacket.readVarInt( packet );
++                DefinedPacket.readVarInt( packet );
++                rewriteVarInt( packet, oldId, newId, packet.readerIndex() );
++                break;
++        }
++        packet.readerIndex( readerIndex );
++    }
++
++    @Override
++    public void rewriteServerbound(ByteBuf packet, int oldId, int newId)
++    {
++        super.rewriteServerbound( packet, oldId, newId );
++        // Special cases
++        int readerIndex = packet.readerIndex();
++        int packetId = DefinedPacket.readVarInt( packet );
++        int packetIdLength = packet.readerIndex() - readerIndex;
++
++        if ( packetId == 0x2C /* Travertine (1.16: 20w16a+ 0x2B -> 0x2C) Spectate : PacketPlayInSpectate */ && !BungeeCord.getInstance().getConfig().isIpForward() )
++        {
++            UUID uuid = DefinedPacket.readUUID( packet );
++            ProxiedPlayer player;
++            if ( ( player = BungeeCord.getInstance().getPlayer( uuid ) ) != null )
++            {
++                int previous = packet.writerIndex();
++                packet.readerIndex( readerIndex );
++                packet.writerIndex( readerIndex + packetIdLength );
++                DefinedPacket.writeUUID( ( (UserConnection) player ).getPendingConnection().getOfflineId(), packet );
++                packet.writerIndex( previous );
++            }
++        }
++        packet.readerIndex( readerIndex );
++    }
++}
++// Travertine end
+\ No newline at end of file
+-- 
+2.25.0.windows.1
+
