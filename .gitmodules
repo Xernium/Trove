@@ -1,3 +1,5 @@
+
 [submodule "Waterfall"]
 	path = Waterfall
-	url = https://github.com/WaterfallMC/Waterfall.git
+	url = https://github.com/Xernium/Waterfall.git
+	branch = future/master
