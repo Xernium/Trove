@@ -1,11 +1,11 @@
-From a5f023bb3c21941eaf45f1c8946b719d0752590e Mon Sep 17 00:00:00 2001
-From: Techcable <Techcable@techcable.net>
-Date: Mon, 6 Jun 2016 13:47:46 -0600
-Subject: [PATCH] Rename references from Waterfall to Travertine
+From 263480063f4c2fc74498f7c6ecf1da84963e4547 Mon Sep 17 00:00:00 2001
+From: FivePB <admin@fivepb.me>
+Date: Wed, 8 Jun 2016 19:22:11 -0600
+Subject: [PATCH] Rename references from Waterfall to Trove
 
 
 diff --git a/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java b/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
-index a4516ed96..1f63a2c27 100644
+index a4516ed9..b7a52d8e 100644
 --- a/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
 +++ b/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
 @@ -7,7 +7,7 @@ public class Bootstrap
@@ -13,12 +13,12 @@ index a4516ed96..1f63a2c27 100644
          if ( Float.parseFloat( System.getProperty( "java.class.version" ) ) < 52.0 )
          {
 -            System.err.println( "*** ERROR *** Waterfall requires Java 8 or above to function! Please download and install it!" );
-+            System.err.println( "*** ERROR *** Travertine requires Java 8 or above to function! Please download and install it!" );
++            System.err.println( "*** ERROR *** Trove requires Java 8 or above to function! Please download and install it!" );
              System.out.println( "You can check your Java version with the command: java -version" );
              return;
          }
 diff --git a/log/src/main/java/net/md_5/bungee/log/LogDispatcher.java b/log/src/main/java/net/md_5/bungee/log/LogDispatcher.java
-index d703d6d24..d8dcdc1e3 100644
+index d703d6d2..72b86c02 100644
 --- a/log/src/main/java/net/md_5/bungee/log/LogDispatcher.java
 +++ b/log/src/main/java/net/md_5/bungee/log/LogDispatcher.java
 @@ -12,7 +12,7 @@ public class LogDispatcher extends Thread
@@ -26,12 +26,12 @@ index d703d6d24..d8dcdc1e3 100644
      public LogDispatcher(BungeeLogger logger)
      {
 -        super( "Waterfall Logger Thread" );
-+        super( "Travertine Logger Thread" );
++        super( "Trove Logger Thread" );
          this.logger = logger;
      }
  
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-index c09f5b4c3..97de4271c 100644
+index c09f5b4c..c1d5db9e 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 @@ -188,7 +188,7 @@ public class BungeeCord extends ProxyServer
@@ -39,7 +39,7 @@ index c09f5b4c3..97de4271c 100644
      {
          // Java uses ! to indicate a resource inside of a jar/zip/other container. Running Bungee from within a directory that has a ! will cause this to muck up.
 -        Preconditions.checkState( new File( "." ).getAbsolutePath().indexOf( '!' ) == -1, "Cannot use Waterfall in directory with ! in path." );
-+        Preconditions.checkState( new File( "." ).getAbsolutePath().indexOf( '!' ) == -1, "Cannot use Travertine in directory with ! in path." );
++        Preconditions.checkState( new File( "." ).getAbsolutePath().indexOf( '!' ) == -1, "Cannot use Trove in directory with ! in path." );
  
          try
          {
@@ -48,12 +48,12 @@ index c09f5b4c3..97de4271c 100644
      public String getName()
      {
 -        return "Waterfall";
-+        return "Travertine";
++        return "Trove";
      }
  
      @Override
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java b/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
-index 356805285..1c2628d31 100644
+index 35680528..7590b45e 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
 @@ -76,7 +76,7 @@ public class BungeeCordLauncher
@@ -61,12 +61,12 @@ index 356805285..1c2628d31 100644
          BungeeCord bungee = new BungeeCord();
          ProxyServer.setInstance( bungee );
 -        bungee.getLogger().info( "Enabled Waterfall version " + bungee.getVersion() );
-+        bungee.getLogger().info( "Enabled Travertine version " + bungee.getVersion() );
++        bungee.getLogger().info( "Enabled Trove version " + bungee.getVersion() );
          bungee.start();
  
          if ( !options.has( "noconsole" ) )
 diff --git a/proxy/src/main/java/net/md_5/bungee/command/CommandBungee.java b/proxy/src/main/java/net/md_5/bungee/command/CommandBungee.java
-index b26035cf9..4e2c6129c 100644
+index b26035cf..9896ee3a 100644
 --- a/proxy/src/main/java/net/md_5/bungee/command/CommandBungee.java
 +++ b/proxy/src/main/java/net/md_5/bungee/command/CommandBungee.java
 @@ -16,6 +16,6 @@ public class CommandBungee extends Command
@@ -74,11 +74,11 @@ index b26035cf9..4e2c6129c 100644
      public void execute(CommandSender sender, String[] args)
      {
 -        sender.sendMessage( ChatColor.BLUE + "This server is running Waterfall version " + ProxyServer.getInstance().getVersion() + " by md_5" );
-+        sender.sendMessage( ChatColor.BLUE + "This server is running Travertine version " + ProxyServer.getInstance().getVersion() + " by md_5" );
++        sender.sendMessage( ChatColor.BLUE + "This server is running Trove version " + ProxyServer.getInstance().getVersion() + " by md_5" );
      }
  }
 diff --git a/proxy/src/main/java/net/md_5/bungee/command/CommandReload.java b/proxy/src/main/java/net/md_5/bungee/command/CommandReload.java
-index 720d0c3b5..dca7601b0 100644
+index 720d0c3b..b3d29018 100644
 --- a/proxy/src/main/java/net/md_5/bungee/command/CommandReload.java
 +++ b/proxy/src/main/java/net/md_5/bungee/command/CommandReload.java
 @@ -23,7 +23,7 @@ public class CommandReload extends Command
@@ -87,12 +87,12 @@ index 720d0c3b5..dca7601b0 100644
  
 -        sender.sendMessage( ChatColor.BOLD.toString() + ChatColor.RED.toString() + "Waterfall has been reloaded."
 -                + " This is NOT advisable and you will not be supported with any issues that arise! Please restart Waterfall ASAP." );
-+        sender.sendMessage( ChatColor.BOLD.toString() + ChatColor.RED.toString() + "Travertine has been reloaded."
-+                + " This is NOT advisable and you will not be supported with any issues that arise! Please restart Travertine ASAP." );
++        sender.sendMessage( ChatColor.BOLD.toString() + ChatColor.RED.toString() + "Trove has been reloaded."
++                + " This is NOT advisable and you will not be supported with any issues that arise! Please restart Trove ASAP." );
      }
  }
 diff --git a/proxy/src/main/java/net/md_5/bungee/conf/YamlConfig.java b/proxy/src/main/java/net/md_5/bungee/conf/YamlConfig.java
-index 65121ba24..d4fad294c 100644
+index 0644b8cd..d3238d57 100644
 --- a/proxy/src/main/java/net/md_5/bungee/conf/YamlConfig.java
 +++ b/proxy/src/main/java/net/md_5/bungee/conf/YamlConfig.java
 @@ -227,7 +227,7 @@ public class YamlConfig implements ConfigurationAdapter
@@ -100,10 +100,10 @@ index 65121ba24..d4fad294c 100644
              String name = entry.getKey();
              String addr = get( "address", "localhost:25565", val );
 -            String motd = ChatColor.translateAlternateColorCodes( '&', get( "motd", "&1Just another Waterfall - Forced Host", val ) );
-+            String motd = ChatColor.translateAlternateColorCodes( '&', get( "motd", "&1Just another Travertine - Forced Host", val ) );
++            String motd = ChatColor.translateAlternateColorCodes( '&', get( "motd", "&1Just another Trove - Forced Host", val ) );
              boolean restricted = get( "restricted", false, val );
              SocketAddress address = Util.getAddr( addr );
              ServerInfo info = ProxyServer.getInstance().constructServerInfo( name, address, motd, restricted );
 -- 
-2.31.1
+2.30.0
 

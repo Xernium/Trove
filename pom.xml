@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.waterfallmc</groupId>
-    <artifactId>travertine-super</artifactId>
+    <artifactId>trove-super</artifactId>
     <version>dev-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -12,7 +12,7 @@
     <url>https://github.com/WaterfallMC/Travertine</url>
 
     <modules>
-        <module>Travertine-Proxy</module>
+        <module>Trove-Proxy</module>
     </modules>
 
     <build>
